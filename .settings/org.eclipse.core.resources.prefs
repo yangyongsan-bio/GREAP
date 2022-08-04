@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+encoding//WebContent/WEB-INF/view/Genome-Browser.ftl=UTF-8
+encoding//WebContent/WEB-INF/view/analysis_result_list.ftl=UTF-8
+encoding//WebContent/WEB-INF/view/analysis_set_detail.ftl=UTF-8
+encoding//WebContent/WEB-INF/view/analysis_set_detail_region.ftl=UTF-8
+encoding//WebContent/WEB-INF/view/index.ftl=UTF-8
+encoding//src/com/lyy/controller/SearchController.java=UTF-8
+encoding/<project>=UTF-8

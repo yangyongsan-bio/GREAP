@@ -1,0 +1,6959 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lyy.mapper.SearchMapper">
+
+	<select id="queryData_Type" resultType="string">
+		select datatype from browse group by datatype order by instr('ChromHMM,TF,TcoF,Histone,ATAC,Enhancer,Super_Enhancer,SNP,Methylation,LncRNA,mRNA',datatype)
+	</select>
+	<select id="queryTissue_Name" resultType="string">
+		select dataset from
+		browse where datatype = #{Data_Type} group by dataset
+	</select>
+	
+    <select id="queryBysearch_region" parameterType="hashmap" resultType="hashmap">
+		select * from browselist where 
+		`set` in (${setnew})
+	</select>
+    <select id="queryBysearch_gene" parameterType="hashmap" resultType="hashmap">
+		select chr,start,end from gene_region where 
+		gene = #{gene}
+	</select>
+	
+	<select id="querylisttable" resultType="string">
+		select subclass from
+		table_name where `set` = #{set}
+	</select>
+	
+	<select id="queryByDatatype" parameterType="hashmap" resultType="hashmap">
+	    select dataclass,count(*) as number from ${table} group by dataclass order by instr('ChromHMM,TF,TcoF,Histone,ATAC,Enhancer,Super_Enhancer,SNP,Methylation,LncRNA,mRNA',dataclass)
+	</select>
+	<select id="queryByDataset" parameterType="hashmap" resultType="hashmap">
+		select subclass,count(*) as number from ${table} group by subclass
+	</select>
+	<select id="queryByDatatype_1" parameterType="hashmap" resultType="hashmap">
+	    select dataclass,count(*) as number from ${table} where dataclass = #{datatype} group by dataclass
+	</select>
+	<select id="queryByDataset_1" parameterType="hashmap" resultType="hashmap">
+	    select subclass,count(*) as number from ${table} where dataclass = #{datatype} group by subclass
+	</select>
+	<select id="queryByDatatype_2" parameterType="hashmap" resultType="hashmap">
+	    select dataclass,count(*) as number from ${table} where subclass = #{dataset} group by dataclass
+	</select>
+	<select id="queryByDataset_2" parameterType="hashmap" resultType="hashmap">
+	    select subclass,count(*) as number from ${table} where subclass = #{dataset} group by subclass
+	</select>
+	<select id="queryByDatatype_3" parameterType="hashmap" resultType="hashmap">
+	    select dataclass,count(*) as number from ${table} where dataclass= #{datatype} and subclass = #{dataset} group by dataclass
+	</select>
+	<select id="queryByDataset_3" parameterType="hashmap" resultType="hashmap">
+	    select subclass,count(*) as number from ${table} where dataclass= #{datatype} and subclass = #{dataset} group by subclass
+	</select>
+
+	<select id="queryBybrowselist" parameterType="hashmap" resultType="hashmap">
+		select * from ${table}
+		<if test="searchValue != ''">
+		where dataclass like concat("%", #{searchValue}, "%") or subclass like concat("%", #{searchValue}, "%") or `set` like  concat("%", #{searchValue}, "%") or num like concat("%", #{searchValue}, "%")
+		</if>
+	</select>
+	<select id="queryBybrowselist_1" parameterType="hashmap" resultType="hashmap">
+		select * from ${table} where dataclass = #{datatype}
+		<if test="searchValue != ''">
+		AND (subclass like concat("%", #{searchValue}, "%") or `set` like concat("%", #{searchValue}, "%") or num like concat("%", #{searchValue}, "%"))
+		</if>
+	</select>
+	<select id="queryBybrowselist_2" parameterType="hashmap" resultType="hashmap">
+		select * from ${table} where subclass = #{dataset}
+		<if test="searchValue != ''">
+		AND (dataclass like concat("%", #{searchValue}, "%") or `set` like concat("%", #{searchValue}, "%") or num like concat("%", #{searchValue}, "%"))
+		</if>
+	</select>
+	<select id="queryBybrowselist_3" parameterType="hashmap" resultType="hashmap">
+		select * from ${table} where dataclass = #{datatype} and subclass = #{dataset}
+		<if test="searchValue != ''">
+		AND (`set` like concat("%", #{searchValue}, "%") or num like concat("%", #{searchValue}, "%"))
+		</if>
+	</select>
+
+    <select id="queryBydownlist1" parameterType="hashmap" resultType="hashmap">
+		select DISTINCT dataclass,subclass from browselist
+		<if test="searchValue != ''">
+		AND (dataclass like concat("%", #{searchValue}, "%") or subclass like concat("%", #{searchValue}, "%"))
+		</if>
+	</select>
+    <select id="queryBydownlist2" parameterType="hashmap" resultType="hashmap">
+		select DISTINCT dataclass from browselist
+		<if test="searchValue != ''">
+		AND (dataclass like concat("%", #{searchValue}, "%"))
+		</if>
+	</select>
+
+	<select id="querySubclass" parameterType="hashmap" resultType="hashmap">
+		select * from ${datatype}
+	</select>
+
+	<select id="querylistchr" parameterType="hashmap" resultType="java.util.LinkedHashMap">
+		select
+		chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY
+		from
+		set_chr where dataclass = #{datatype} and subclass =
+		#{subclass}
+		and `set` =
+		#{set}
+	</select>
+
+	<select id="querylistfile" parameterType="hashmap" resultType="hashmap">
+		select * from ${subclass} where `set` = #{set}
+	</select>
+	
+	<select id="querydownload" parameterType="hashmap" resultType="hashmap">
+		select * from browse where datatype = #{set}
+	</select>
+	<!--############################## Search by TF ############################## -->
+
+	<select id="querytfname" resultType="string">
+		select TF from TF_sample
+		group by TF
+	</select>
+	<select id="querytype" resultType="string">
+		select type from TF_sample
+		where TF = #{tfname} group by type
+	</select>
+	<select id="queryByTF_name_pro_tablename" resultType="string">
+		SELECT
+		distinct
+		ID
+		FROM
+		TF_pair_chai
+		WHERE
+		Source = #{source}
+		and
+		Type = "pro"
+		and
+		CHR = #{chr}
+
+	</select>
+	<select id="queryByTF_name_other_tablename" resultType="string">
+		SELECT
+		distinct
+		ID
+		FROM
+		TF_pair_chai
+		WHERE
+		Source = #{source}
+		and
+		Type = "other"
+		and
+		CHR = #{chr}
+
+	</select>
+	<select id="queryByTF_promoter_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "GENCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in (
+		select lncRNA from
+		${pro_tablename} where Regulation_region = #{regulation}
+		and TF =
+		#{tfnames} and sample = #{type}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "GENCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${other_tablename} where TF =
+		#{tfnames} and sample =
+		#{type}
+		)
+
+
+	</select>
+	<select id="queryByTF_se_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${pro_tablename} where
+		Regulation_region = #{regulation}
+		and TF = #{tfnames} and sample =
+		#{type}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${other_tablename} where TF =
+		#{tfnames} and sample =
+		#{type}
+		)
+
+
+	</select>
+	<select id="queryByTF_chromatin_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${pro_tablename} where
+		Regulation_region = #{regulation}
+		and TF = #{tfnames} and sample =
+		#{type}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${other_tablename} where TF =
+		#{tfnames} and sample =
+		#{type}
+		)
+
+
+	</select>
+
+	<select id="queryByTF_promoter_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "NONCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in (
+		select lncRNA from
+		${pro_tablename} where Regulation_region = #{regulation}
+		and TF =
+		#{tfnames} and sample = #{type}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "NONCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${other_tablename} where TF =
+		#{tfnames} and sample =
+		#{type}
+		)
+
+
+	</select>
+	<select id="queryByTF_se_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${pro_tablename} where
+		Regulation_region = #{regulation}
+		and TF = #{tfnames} and sample =
+		#{type}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${other_tablename} where TF =
+		#{tfnames} and sample =
+		#{type}
+		)
+
+
+	</select>
+	<select id="queryByTF_chromatin_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${pro_tablename} where
+		Regulation_region = #{regulation}
+		and TF = #{tfnames} and sample =
+		#{type}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in (
+		select lncRNA from ${other_tablename} where TF =
+		#{tfnames} and sample =
+		#{type}
+		)
+
+
+	</select>
+
+	<select id="queryByTF_promoter_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region =
+		#{regulation}
+		and
+		t.lncRNA_name in (
+		select lncRNA from tfname_pro_copy1
+		where Regulation_region = #{regulation}
+		and TF = #{tfnames}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region = #{regulation}
+		and
+		t.lncRNA_name in (
+		select lncRNA from tfname_other2 where TF =
+		#{tfnames}
+		)
+	</select>
+	<select id="queryByTF_se_A" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		t.lncRNA_name in (
+		select lncRNA
+		from tfname_pro_copy1 where Regulation_region = #{regulation}
+		and TF =
+		#{tfnames}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		t.lncRNA_name in (
+		select lncRNA from tfname_other2 where TF = #{tfnames}
+		)
+
+	</select>
+	<select id="queryByTF_chromatin_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		t.lncRNA_name in (
+		select lncRNA from tfname_pro_copy1 where Regulation_region =
+		#{regulation}
+		and TF = #{tfnames}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		t.lncRNA_name in (
+		select lncRNA from tfname_other2 where TF =
+		#{tfnames}
+		)
+	</select>
+
+	<select id="queryByTF_left" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		tf_class t
+		WHERE
+		class_TF = #{tfnames}
+	</select>
+	<select id="queryByTF_right_node" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT lncRNA from ${other_tablename}
+		where
+		sample =
+		#{type}
+		and
+		TF = #{tfnames}
+		union
+		select DISTINCT lncRNA from
+		${pro_tablename}
+		where
+		Regulation_region = #{regulation}
+		and
+		sample =
+		#{type}
+		and
+		TF = #{tfnames}
+	</select>
+	<select id="queryByTF_right_node_A" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT lncRNA from tfname_other2
+		where
+		sample =
+		#{type}
+		and
+		TF = #{tfnames}
+		and
+		chr = #{chr}
+		union
+		select DISTINCT lncRNA
+		from tfname_pro_copy1
+		where
+		Regulation_region = #{regulation}
+		and
+		sample =
+		#{type}
+		and
+		TF = #{tfnames}
+		and
+		chr = #{chr}
+	</select>
+	<select id="queryByTF_right_edge" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT 'Promoter' as source, lncRNA as target from
+		${pro_tablename}
+		WHERE
+		Regulation_region = #{regulation}
+		and
+		sample =
+		#{type}
+		and
+		TF = #{tfnames}
+		union
+		select DISTINCT type as source, lncRNA
+		as target from
+		${other_tablename}
+		WHERE
+		sample = #{type}
+		and
+		TF =
+		#{tfnames}
+	</select>
+	<select id="queryByTF_right_edge_A" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT 'Promoter' as source, lncRNA as target from
+		tfname_pro_copy1
+		WHERE
+		Regulation_region = #{regulation}
+		and
+		sample =
+		#{type}
+		and
+		TF = #{tfnames}
+		and
+		chr = #{chr}
+		union
+		select DISTINCT type as
+		source,
+		lncRNA as target from
+		tfname_other2
+		WHERE
+		sample = #{type}
+		and
+		TF =
+		#{tfnames}
+		and
+		chr = #{chr}
+	</select>
+	<!--############################## Search by TF 完毕############################## -->
+
+	<!--############################## Search by LncName ############################## -->
+	<select id="queryRegulation" resultType="string">
+		select
+		Regulation_regions from lncname_g group by Regulation_regions
+	</select>
+	<!--###### Search by LncName-source为GENCODE-lncnames为单个 ###### -->
+	<select id="queryByLncName_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		lncname_g t
+		WHERE
+		Regulation_regions =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByLncName_chr" resultType="string">
+		SELECT distinct
+		CHR
+		FROM
+		lncname_g t
+		WHERE
+		Regulation_regions = #{regulation}
+		and
+		t.lncRNA_name = #{lncnames}
+		UNION
+		SELECT distinct
+		CHR
+		FROM
+		lncname_n t
+		WHERE
+		Regulation_regions = #{regulation}
+		and
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<select id="queryByLncName_start" resultType="string">
+		SELECT distinct
+		Start
+		FROM
+		lncname_g t
+		WHERE
+		Regulation_regions = #{regulation}
+		and
+		t.lncRNA_name = #{lncnames}
+		UNION
+		SELECT distinct
+		Start
+		FROM
+		lncname_n t
+		WHERE
+		Regulation_regions = #{regulation}
+		and
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<select id="queryByLncName_end" resultType="string">
+		SELECT distinct
+		End
+		FROM
+		lncname_g t
+		WHERE
+		Regulation_regions = #{regulation}
+		and
+		t.lncRNA_name = #{lncnames}
+		UNION
+		SELECT distinct
+		End
+		FROM
+		lncname_n t
+		WHERE
+		Regulation_regions = #{regulation}
+		and
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<!--###### Search by LncName-source为NONCODE-lncnames为单个 ###### -->
+	<select id="queryByLncName_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		lncname_n t
+		WHERE
+		Regulation_regions =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<!--###### lncnames为多个 ###### -->
+	<select id="queryBypromoter_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByse_A" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryBychromatin_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryBypromoter_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = #{source}
+		and
+		Region =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryBypromoter_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = #{source}
+		and
+		Region =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByse_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByse_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="queryBychromatin_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA_name
+		in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryBychromatin_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA_name
+		in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByresult_left" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		browse t
+		WHERE
+		source = #{source}
+		and
+		region =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByresult_left_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		browse t
+		WHERE
+		region = #{regulation}
+		and
+		t.lncRNA_name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByresult_right" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		search_result t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<select id="queryByresult_right_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		search_result t
+		WHERE
+		t.lncRNA in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+	</select>
+	<!--############################## Search by SNP ############################## -->
+	<select id="queryBySNP_promoter_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "GENCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from
+		snp_pro where source = "GENCODE" and Regulation_region =
+		#{regulation}
+		and snp_id = #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "GENCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select
+		lncRNA from snp_other where source = "GENCODE" and snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_se_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_pro where source = "GENCODE"
+		and Regulation_region =
+		#{regulation} and snp_id = #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_other where source = "GENCODE"
+		and snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_chromatin_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_pro where source = "GENCODE"
+		and Regulation_region =
+		#{regulation} and snp_id = #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name
+		in
+		(
+		select lncRNA from snp_other where source = "GENCODE" and snp_id =
+		#{snpid}
+		)
+	</select>
+	<select id="queryBySNP_promoter_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "NONCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from
+		snp_pro where source = "NONCODE" and Regulation_region =
+		#{regulation}
+		and snp_id = #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "NONCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select
+		lncRNA from snp_other where source = "NONCODE" and snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_se_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_pro where source = "NONCODE"
+		and Regulation_region =
+		#{regulation} and snp_id = #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_other where source = "NONCODE"
+		and snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_chromatin_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_pro where source = "NONCODE"
+		and Regulation_region =
+		#{regulation} and snp_id = #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name
+		in
+		(
+		select lncRNA from snp_other where source = "NONCODE" and snp_id =
+		#{snpid}
+		)
+	</select>
+	<select id="queryBySNP_promoter_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_pro where
+		Regulation_region = #{regulation} and
+		snp_id = #{snpid}
+		)
+		union
+		SELECT
+		distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_other where snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_se_A" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+
+		t.lncRNA_name in
+		(
+		select lncRNA
+		from snp_pro where Regulation_region = #{regulation} and
+		snp_id =
+		#{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_other where snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_chromatin_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+
+		t.lncRNA_name in
+		(
+		select
+		lncRNA from snp_pro where Regulation_region = #{regulation} and
+		snp_id
+		= #{snpid}
+		)
+		union
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+
+		t.lncRNA_name in
+		(
+		select lncRNA from snp_other where snp_id = #{snpid}
+		)
+	</select>
+	<select id="queryBySNP_left" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp t
+		WHERE
+		ID = #{snpid}
+	</select>
+	<select id="queryBySNP_right_node_A" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT
+		lncRNA from snp_pro
+		where Regulation_region =
+		#{regulation}
+		and
+		snp_id =
+		#{snpid}
+		union
+		select DISTINCT
+		lncRNA from
+		snp_other
+		where
+		snp_id = #{snpid}
+	</select>
+	<select id="queryBySNP_right_node" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT
+		lncRNA from snp_pro
+		where
+		source = #{source}
+		and
+		Regulation_region = #{regulation}
+		and
+		snp_id = #{snpid}
+		union
+		select
+		DISTINCT
+		lncRNA from snp_other
+		where
+		source = #{source}
+		and
+		snp_id =
+		#{snpid}
+	</select>
+	<select id="queryBySNP_right_edge_A" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT
+		type as source, lncRNA as target
+		from snp_pro
+		where Regulation_region = #{regulation}
+		and
+		snp_id = #{snpid}
+		union
+		select DISTINCT
+		type as source, lncRNA as target
+		from snp_other
+		where
+		snp_id = #{snpid}
+	</select>
+	<select id="queryBySNP_right_edge" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT
+		type as source, lncRNA as target
+		from snp_pro
+		where
+		source = #{source}
+		and
+		Regulation_region = #{regulation}
+		and
+		snp_id =
+		#{snpid}
+		union
+		select DISTINCT
+		type as source, lncRNA as target
+		from
+		snp_other
+		where
+		source = #{source}
+		and
+		snp_id = #{snpid}
+	</select>
+	<!-- ################################ search by enhancer ################################## -->
+	<select id="queryEnhancerBiosample_Type" resultType="string">
+		select Type
+		from SE_ID group by Type
+	</select>
+	<select id="queryEnhancerBiosample_Name" resultType="string">
+		select
+		Sample from SE_ID where Type = #{Biosample_Type} group by Sample
+	</select>
+	<select id="queryByenhancer_promoter_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "GENCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryByenhancer_se_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryByenhancer_chromatin_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryByenhancer_promoter_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "NONCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryByenhancer_se_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryByenhancer_chromatin_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryByenhancer_promoter_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from se_g
+		where chr = #{chr} and `start` =
+		#{start} and `end` = #{end}
+		union
+		select distinct lncRNA_name from se_n where chr = #{chr} and `start` =
+		#{start} and `end` = #{end}
+		)
+	</select>
+	<select id="queryByenhancer_se_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from se_g where chr = #{chr} and `start` =
+		#{start} and `end` = #{end}
+		union
+		select distinct lncRNA_name from se_n
+		where chr = #{chr} and `start` =
+		#{start} and `end` = #{end}
+		)
+	</select>
+	<select id="queryByenhancer_chromatin_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		t.lncRNA_name in
+		(
+		select
+		distinct lncRNA_name from se_g where chr = #{chr} and `start` =
+		#{start} and `end` = #{end}
+		union
+		select distinct lncRNA_name from se_n
+		where chr = #{chr} and `start` =
+		#{start} and `end` = #{end}
+		)
+	</select>
+	<select id="queryByenhancer_left_moren" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		HCT116 t
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{end}
+		UNION
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		HCT116 t
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		HCT116 t
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		HCT116 t
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > start
+		and
+		end > #{end}
+	</select>
+	<select id="queryByenhancer_right_node_moren" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		lncRNA_name
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{end}
+		UNION
+		SELECT distinct
+		lncRNA_name
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		start >
+		#{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name
+		FROM
+		HCT116
+		WHERE
+		Source =
+		#{source}
+		and
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > start
+		and
+		end >
+		#{end}
+	</select>
+	<select id="queryByenhancer_right_edge_moren" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		HCT116
+		WHERE
+		Source =
+		#{source}
+		and
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{end}
+		UNION
+		SELECT
+		distinct
+		lncRNA_name,CLASS
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		chr =
+		#{chr}
+		and
+		start > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > start
+		and
+		end > #{end}
+	</select>
+	<select id="queryByenhancer_left" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{end}
+		UNION
+		SELECT
+		distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		SE_id,chr,start,end,rank,isSuper,`SE-TE_Sample_ID`
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > start
+		and
+		end > #{end}
+	</select>
+	<select id="queryByenhancer_right_node" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		lncRNA_name
+		FROM
+		${se_tablename}
+		WHERE
+		chr =
+		#{chr}
+		and
+		#{start} > start
+		and
+		end > #{end}
+		UNION
+		SELECT distinct
+		lncRNA_name
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > start
+		and
+		end > #{end}
+
+	</select>
+	<select id="queryByenhancer_right_edge" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{end}
+		UNION
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		start >
+		#{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		#{start} > start
+		and
+		end > #{start}
+		and
+		#{end} > end
+		UNION
+		SELECT distinct
+		lncRNA_name,CLASS
+		FROM
+		${se_tablename}
+		WHERE
+		chr = #{chr}
+		and
+		start > #{start}
+		and
+		#{end} > start
+		and
+		end > #{end}
+	</select>
+
+	<!-- ################################ search by chromatin ################################## -->
+	<select id="queryChromatinBiosample_Type" resultType="string">
+		select Type
+		from DNaseI_ID group by Type
+	</select>
+	<select id="queryChromatinBiosample_Name" resultType="string">
+		select
+		Sample from DNaseI_ID where Type = #{bio_Type} group by Sample
+	</select>
+
+	<select id="queryBych_promoter" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = #{source}
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryBych_se" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+	<select id="queryBych_chromatin" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = #{source}
+		and
+		t.lncRNA_name in
+		(
+		${lnc}
+		)
+	</select>
+
+	<select id="queryBych_left" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		CHR,Start,End,"DNase-seq" as method
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End >
+		#{end}
+		UNION
+		select distinct
+		CHR,Start,End,"DNase-seq" as method
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		Start >
+		#{start}
+		and
+		#{end} >
+		End
+		UNION
+		select distinct
+		CHR,Start,End,"DNase-seq" as
+		method
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{start}
+		and
+		#{end} > End
+		UNION
+		select distinct
+		CHR,Start,End,"DNase-seq" as method
+		FROM
+		${D_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		Start
+		and
+		End >
+		#{end}
+		UNION
+		select distinct
+		CHR,Start,End,"ATAC-seq" as method
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} >
+		Start
+		and
+		End > #{end}
+		UNION
+		select distinct
+		CHR,Start,End,"ATAC-seq" as
+		method
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		End
+		UNION
+		select distinct
+		CHR,Start,End,"ATAC-seq" as method
+		FROM
+		${A_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{start}
+		and
+		#{end}
+		> End
+		UNION
+		select distinct
+		CHR,Start,End,"ATAC-seq" as method
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		Start >
+		#{start}
+		and
+		#{end} >
+		Start
+		and
+		End > #{end}
+	</select>
+	<select id="queryBych_right_node" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		lncRNA_name
+		FROM
+		${D_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{end}
+		UNION
+		select
+		distinct
+		lncRNA_name
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR =
+		#{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		End
+		UNION
+		select distinct
+		lncRNA_name
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{start}
+		and
+		#{end} > End
+		UNION
+		select
+		distinct
+		lncRNA_name
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR =
+		#{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		Start
+		and
+		End > #{end}
+		UNION
+		select
+		distinct
+		lncRNA_name
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR =
+		#{chr}
+		and
+		#{start} > Start
+		and
+		End > #{end}
+		UNION
+		select distinct
+		lncRNA_name
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		End
+		UNION
+		select distinct
+		lncRNA_name
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} >
+		Start
+		and
+		End > #{start}
+		and
+		#{end} > End
+		UNION
+		select distinct
+		lncRNA_name
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		Start >
+		#{start}
+		and
+		#{end} >
+		Start
+		and
+		End > #{end}
+	</select>
+	<select id="queryBych_right_edge" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		lncRNA_name,class
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{end}
+		UNION
+		select distinct
+		lncRNA_name,class
+		FROM
+		${D_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		End
+		UNION
+		select
+		distinct
+		lncRNA_name,class
+		FROM
+		${D_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{start}
+		and
+		#{end} > End
+		UNION
+		select distinct
+		lncRNA_name,class
+		FROM
+		${D_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		Start
+		and
+		End >
+		#{end}
+		UNION
+		select distinct
+		lncRNA_name,class
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{end}
+		UNION
+		select distinct
+		lncRNA_name,class
+		FROM
+		${A_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		End
+		UNION
+		select
+		distinct
+		lncRNA_name,class
+		FROM
+		${A_tablename}
+		WHERE
+		Source = #{source}
+		and
+		CHR = #{chr}
+		and
+		#{start} > Start
+		and
+		End > #{start}
+		and
+		#{end} > End
+		UNION
+		select distinct
+		lncRNA_name,class
+		FROM
+		${A_tablename}
+		WHERE
+		Source =
+		#{source}
+		and
+		CHR = #{chr}
+		and
+		Start > #{start}
+		and
+		#{end} >
+		Start
+		and
+		End >
+		#{end}
+	</select>
+
+	<select id="queryBych_promoter_DG" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "GENCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select distinct
+		lncRNA_name from chromatind_g_copy where CHR = #{chr} and
+		`Start` =
+		#{start} and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_se_DG" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from chromatind_g_copy
+		where CHR = #{chr} and
+		`Start` = #{start} and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_chromatin_DG" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "GENCODE"
+		and
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from chromatind_g_copy
+		where CHR = #{chr} and
+		`Start` = #{start} and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_promoter_DN" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		source = "NONCODE"
+		and
+		Region = #{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select distinct
+		lncRNA_name from chromatind_n where CHR = #{chr} and `Start`
+		= #{start}
+		and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_se_DN" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from chromatind_n where
+		CHR = #{chr} and `Start`
+		= #{start} and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_chromatin_DN" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		source = "NONCODE"
+		and
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from chromatind_n where
+		CHR = #{chr} and `Start`
+		= #{start} and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_promoter_DA" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		promoter_all t
+		WHERE
+		Region =
+		#{regulation}
+		and
+		t.lncRNA_name in
+		(
+		select distinct lncRNA_name from
+		chromatind_g_copy where CHR = #{chr} and
+		`Start` = #{start} and `End` =
+		#{end}
+		UNION
+		select distinct lncRNA_name from chromatind_n where CHR =
+		#{chr} and `Start`
+		= #{start} and `End` = #{end}
+		)
+	</select>
+	<select id="queryBych_se_DA" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		sse_all t
+		WHERE
+		t.lncRNA_name in
+		(
+		select distinct
+		lncRNA_name from chromatind_g_copy where CHR = #{chr} and
+		`Start` =
+		#{start} and `End` = #{end}
+		UNION
+		select distinct lncRNA_name from
+		chromatind_n where CHR = #{chr} and `Start`
+		= #{start} and `End` =
+		#{end}
+		)
+	</select>
+	<select id="queryBych_chromatin_DA" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		ch_all t
+		WHERE
+		t.lncRNA_name in
+		(
+		select
+		distinct lncRNA_name from chromatind_g_copy where CHR = #{chr} and
+		`Start` = #{start} and `End` = #{end}
+		UNION
+		select distinct lncRNA_name
+		from chromatind_n where CHR = #{chr} and `Start`
+		= #{start} and `End` =
+		#{end}
+		)
+	</select>
+	<!-- ################ detail页柱状图 ################## 功能重复 -->
+	<select id="queryByPro_number_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		Common_SNP,eQTL,Risk_SNP,SAS,EUR,EAS,AMR,AFR,TF,motif,450K,WGBS,Intersection,Histone
+		FROM
+		promoter_g t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+		AND
+		Region =
+		#{regulation}
+	</select>
+	<select id="queryByPro_number_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		Common_SNP,eQTL,Risk_SNP,SAS,EUR,EAS,AMR,AFR,TF,motif,450K,WGBS,Intersection,Histone
+		FROM
+		promoter_n t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+		AND
+		Region =
+		#{regulation}
+	</select>
+	<select id="queryBySE_number_G" parameterType="hashmap"
+		resultType="string">
+		SELECT distinct
+		Common_SNP,eQTL,Risk_SNP,SAS,EUR,EAS,AMR,AFR,TF,450K,WGBS,Intersection,Histone
+		FROM
+		sse_g t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<select id="queryBySE_number_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		Common_SNP,eQTL,Risk_SNP,SAS,EUR,EAS,AMR,AFR,TF,450K,WGBS,Intersection,Histone
+		FROM
+		sse_n t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<select id="queryByCh_number_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		Common_SNP,eQTL,Risk_SNP,SAS,EUR,EAS,AMR,AFR,TF,450K,WGBS,Intersection,Histone
+		FROM
+		ch_g t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<select id="queryByCh_number_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		Common_SNP,eQTL,Risk_SNP,SAS,EUR,EAS,AMR,AFR,TF,450K,WGBS,Intersection,Histone
+		FROM
+		ch_n t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<!-- ################ detail页柱状图完毕 ################## -->
+	<select id="queryBySearchDiseasedis" resultType="string">
+		select disease
+		from disease_g group by disease
+		union
+		select disease from disease_n
+		group by disease
+	</select>
+	<select id="queryBySearchDisease_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		disease_g t
+		WHERE
+		t.Disease =
+		#{disease}
+
+	</select>
+	<select id="queryBySearchDisease_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		disease_n t
+		WHERE
+		t.Disease =
+		#{disease}
+
+	</select>
+	<select id="queryBydisease_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		disease_g t
+		WHERE
+		t.lncRNA_name =
+		#{lncnames}
+
+	</select>
+	<select id="queryBydisease_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		disease_n t
+		WHERE
+		t.lncRNA_name =
+		#{lncnames}
+	</select>
+	<select id="queryBymirna_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		mirna_g t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+
+	</select>
+	<select id="queryBymirna_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		mirna_n t
+		WHERE
+		t.lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryBylocalization" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		lncRNA_localization t
+		WHERE
+		lncSource =
+		#{source}
+		and
+		LncRNA = #{lncnames}
+
+	</select>
+	<select id="queryByrbp" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		lncRNA_rbp
+		WHERE
+		RBP_ENSG = #{source}
+		and
+		lncRNA =
+		#{lncnames}
+
+	</select>
+	<!--###### Search by DNaseI 默认值 ###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByDNaseI_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		dnasei t
+		WHERE
+		Biosample_Type = "Cell Line"
+		and
+		Biosample_Name = "A549"
+		and
+		CHR = (select CHR from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > END
+
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByDNaseI_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		dnasei t
+		WHERE
+		Biosample_Type = "Cell Line"
+		and
+		Biosample_Name = "A549"
+		and
+		CHR = (select CHR from lncname_n where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > END
+	</select>
+	<!--#################################################################################### -->
+	<!--###### 总的 Biosample_Type###### -->
+	<select id="queryBiosample_Type" resultType="string">
+		select
+		Biosample_type from dnasei_select group by Biosample_type
+	</select>
+	<!--###### 总的 tiss###### -->
+	<select id="querytiss" resultType="string">
+		select tiss from dnasei_select
+		where Biosample_type = #{Biosample_Type} group by tiss
+	</select>
+	<!--###### 总的 Biosample_Name###### -->
+	<select id="queryBiosample_Name" resultType="string">
+		select
+		Biosample_name from dnasei_select where Biosample_type =
+		#{Biosample_Type} and tiss = #{tiss} group by Biosample_name
+	</select>
+	<!--#################################################################################### -->
+
+	<!--###### Search by DNaseI -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByDNaseI_GG" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		dnasei t
+		WHERE
+		Biosample_Type = #{Biosample_Type}
+		and
+		Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		and
+		CHR = (select CHR from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start
+		from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name
+		= #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > END
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByDNaseI_NN" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		dnasei t
+		WHERE
+		Biosample_Type = #{Biosample_Type}
+		and
+		Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		and
+		CHR = (select CHR from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start
+		from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name
+		= #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > END
+	</select>
+
+	<!--###### Search by TF -Biosample_Type###### -->
+	<select id="queryBiosample_Type_TF" resultType="string">
+		select
+		Biosample_Type from tf_select group by Biosample_Type
+	</select>
+	<!--###### Search by TF -Biosample_Name###### -->
+	<select id="queryBiosample_Name_TF" resultType="hashmap">
+		select
+		Biosample_Name as label,Biosample_Name as value from tf_select where
+		Biosample_Type = #{Biosample_Type_TF} group by Biosample_Name
+	</select>
+	<!--###### Search by TF -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="querytfid" resultType="string">
+		select ID from TF_ID where
+		Biosample_Name = #{Biosample_Name} group by ID
+	</select>
+	<select id="querytfidmap" resultType="hashmap">
+		select ID from TF_ID where
+		Biosample_Name = #{Biosample_Name}
+	</select>
+	<select id="queryByTF_GG" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		*
+		FROM
+		${tf_tablename}
+		WHERE
+		CHR = ( SELECT CHR FROM lncname_g WHERE
+		Regulation_regions =
+		#{regulation} AND lncRNA_name = #{lncnames} )
+		AND
+		STAR > ( SELECT `Start` FROM lncname_g WHERE Regulation_regions =
+		#{regulation} AND lncRNA_name = #{lncnames} )
+		AND ( SELECT `End` FROM
+		lncname_g WHERE Regulation_regions =
+		#{regulation} AND lncRNA_name =
+		#{lncnames} ) >`END`
+
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByTF_NN" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		*
+		FROM
+		${tf_tablename}
+		WHERE
+		CHR = ( SELECT CHR FROM lncname_n WHERE
+		Regulation_regions =
+		#{regulation} AND lncRNA_name = #{lncnames} )
+		AND
+		STAR > ( SELECT `Start` FROM lncname_n WHERE Regulation_regions =
+		#{regulation} AND lncRNA_name = #{lncnames} )
+		AND ( SELECT `End` FROM
+		lncname_n WHERE Regulation_regions =
+		#{regulation} AND lncRNA_name =
+		#{lncnames} ) >`END`
+	</select>
+
+	<!--###### Search by 450k -Biosample_Type###### -->
+	<select id="queryBiosample_Type_450" resultType="string">
+		select
+		Biosample_Type from 450_select group by Biosample_Type
+	</select>
+	<!--###### Search by 450k -Biosample_Name###### -->
+	<select id="queryBiosample_Name_450" resultType="hashmap">
+		select
+		Biosample_Name as label,Biosample_Name as value from 450_select where
+		Biosample_Type = #{Biosample_Type} group by Biosample_Name
+	</select>
+
+	<!--###### Search by Methylation_450k -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBytablename_450k" resultType="string">
+		select ID from
+		methylation_chai_ID where file = "450K" and Type = #{Biosample_Type}
+		and Sample = #{Biosample_Name}
+	</select>
+	<select id="queryBytablename_WGBS" resultType="string">
+		select ID from
+		methylation_chai_ID where file = "WGBS" and Type = #{Biosample_Type}
+		and Sample = #{Biosample_Name}
+	</select>
+	<select id="queryByMethylation_450k_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		${tablename_450k}
+		WHERE
+		CHR = (select CHR
+		from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name
+		= #{lncnames})
+		and
+		STAR > (select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > STAR
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByMethylation_450k_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		${tablename_450k}
+		WHERE
+
+		CHR = (select CHR
+		from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name
+		= #{lncnames})
+		and
+		STAR > (select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > STAR
+	</select>
+
+	<!--###### Search by wgbs -Biosample_Type###### -->
+	<select id="queryBiosample_Type_wgbs" resultType="string">
+		select
+		Biosample_Type from wgbs_select group by Biosample_Type
+	</select>
+	<!--###### Search by wgbs -Biosample_Name###### -->
+	<select id="queryBiosample_Name_wgbs" resultType="hashmap">
+		select
+		Biosample_Name as label,Biosample_Name as value from wgbs_select where
+		Biosample_Type = #{Biosample_Type} group by Biosample_Name
+	</select>
+	<!--###### Search by Methylation_wgbs -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByMethylation_WGBS_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		${tablename_WGBS}
+		WHERE
+		CHR = (select CHR
+		from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name
+		= #{lncnames})
+		and
+		STAR > (select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > STAR
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByMethylation_WGBS_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		${tablename_WGBS}
+		WHERE
+
+		CHR = (select CHR
+		from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name
+		= #{lncnames})
+		and
+		STAR > (select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > STAR
+	</select>
+	<!--###### Search by 3D -Biosample_Name###### -->
+	<select id="queryBiosample_Name_3D" resultType="hashmap">
+		select
+		Biosample_Name as label,Biosample_Name as value from 3d_select group
+		by Biosample_Name
+	</select>
+	<!--###### Search by 3D -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBy3D_G" parameterType="hashmap" resultType="hashmap">
+		select * from 3d
+		where Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+		UNION
+		select * from 3d
+		where
+		Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAEnd
+		UNION
+		select * from 3d
+		where Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		UNION
+		select * from 3d
+		where
+		Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd > (select Start from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select `End` from
+		lncname_g where Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames}) > InteractorAEnd
+		and
+		(select Start from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryBy3D_N" parameterType="hashmap" resultType="hashmap">
+		select * from 3d
+		where Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_n where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+		UNION
+		select * from 3d
+		where
+		Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAEnd
+		UNION
+		select * from 3d
+		where Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		UNION
+		select * from 3d
+		where
+		Biosample_Name in
+		<foreach collection="list" open="(" close=")" separator=","
+			item="item">
+			#{item}
+		</foreach>
+		AND
+		InteractorAChr = (select CHR from lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd > (select Start from lncname_n where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select `End` from
+		lncname_n where Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames}) > InteractorAEnd
+		and
+		(select Start from lncname_n where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+	</select>
+	<!--###### Search by EpiTensor -Biosample_Type###### -->
+	<select id="queryBiosample_Type_EpiTensor" resultType="string">
+		select
+		Biosample_Type from epitensor_select group by Biosample_Type
+	</select>
+	<!--###### Search by EpiTensor -Biosample_Name###### -->
+	<select id="queryBiosample_Name_EpiTensor" resultType="hashmap">
+		select
+		Biosample_Name as label,Biosample_Name as value from epitensor_select
+		where Biosample_Type = #{Biosample_Type} group by Biosample_Name
+	</select>
+	<!--###### Search by EpiTensor -页内搜索###### -->
+	<select id="queryBytablename_inter" resultType="string">
+		select ID from
+		Interaction_chai_ID where Tissue = #{tiss}
+	</select>
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByEpiTensor_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct * from ${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd > (select `End` from
+		lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name =
+		#{lncnames})
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart >
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+
+		UNION
+		select distinct * from ${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart >
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+		and
+		InteractorAEnd > (select `End` from lncname_g where
+		Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorAChr = (select
+		CHR from lncname_g where Regulation_regions =
+		#{regulation} and
+		lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd >
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+		and
+		(select Start from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+
+		UNION
+		select distinct
+		* from ${inter_tablename}
+		where
+		InteractorBChr = (select CHR from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorBStart
+		and
+		InteractorBEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorBChr = (select CHR from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorBChr = (select CHR from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBStart
+		and
+		InteractorBEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct *
+		from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBEnd > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorBStart
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByEpiTensor_N" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct * from ${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select Start from
+		lncname_n where Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd > (select `End` from
+		lncname_n where Regulation_regions
+		= #{regulation} and lncRNA_name =
+		#{lncnames})
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart >
+		(select Start from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+
+		UNION
+		select distinct * from ${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart >
+		(select Start from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+		and
+		InteractorAEnd > (select `End` from lncname_n where
+		Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorAChr = (select
+		CHR from lncname_n where Regulation_regions = #{regulation}
+		and
+		lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd > (select Start from
+		lncname_n where Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) > InteractorAEnd
+		and
+		(select Start from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+
+		UNION
+		select distinct
+		* from ${inter_tablename}
+		where
+		InteractorBChr = (select CHR
+		from
+		lncname_n where Regulation_regions = #{regulation} and
+		lncRNA_name =
+		#{lncnames})
+		and
+		(select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorBStart
+		and
+		InteractorBEnd > (select `End` from lncname_n where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorBChr = (select CHR from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+
+		UNION
+		select distinct *
+		from ${inter_tablename}
+		where
+		InteractorBChr = (select CHR from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBStart
+		and
+		InteractorBEnd >
+		(select `End` from lncname_n where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct * from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBEnd > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+		and
+		(select Start from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorBStart
+	</select>
+	<select id="queryByregionA_G" resultType="string">
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+		and
+		InteractorAEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd >
+		(select Start from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorAStart
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorBStart
+		and
+		InteractorBEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBStart
+		and
+		InteractorBEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBEnd > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorBStart
+	</select>
+	<select id="queryByregionA_N" resultType="string">
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+		and
+		InteractorAEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd >
+		(select Start from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorAStart
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorBStart
+		and
+		InteractorBEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBStart
+		and
+		InteractorBEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBEnd > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorBStart
+	</select>
+	<select id="queryByregionB_G" resultType="string">
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+		and
+		InteractorAEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd >
+		(select Start from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorAStart
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorBStart
+		and
+		InteractorBEnd > (select `End` from lncname_g where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBStart
+		and
+		InteractorBEnd >
+		(select `End` from lncname_g where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBEnd > (select Start from
+		lncname_g where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_g where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+		and
+		(select Start from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorBStart
+	</select>
+	<select id="queryByregionB_N" resultType="string">
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorAStart
+		and
+		InteractorAEnd > (select `End` from lncname_n where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorAStart > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorAStart
+		and
+		InteractorAEnd >
+		(select `End` from lncname_n where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorAChr = (select CHR from lncname_n
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		InteractorAEnd >
+		(select Start from lncname_n where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select `End` from lncname_n where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) >
+		InteractorAEnd
+		and
+		(select Start from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorAStart
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		(select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames}) >
+		InteractorBStart
+		and
+		InteractorBEnd > (select `End` from lncname_n where Regulation_regions
+		= #{regulation} and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBStart > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBStart
+		and
+		InteractorBEnd >
+		(select `End` from lncname_n where Regulation_regions
+		= #{regulation}
+		and lncRNA_name = #{lncnames})
+
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd) from
+		${inter_tablename}
+		where
+		InteractorBChr = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		InteractorBEnd > (select Start from
+		lncname_n where
+		Regulation_regions = #{regulation} and lncRNA_name =
+		#{lncnames})
+		and
+		(select `End` from lncname_n where Regulation_regions =
+		#{regulation}
+		and lncRNA_name = #{lncnames}) > InteractorBEnd
+		and
+		(select Start from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > InteractorBStart
+	</select>
+	<!--###### Search by Motif -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByMotif_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		motif_g t
+		WHERE
+		(select id from motif_id where
+		region = #{regulation}) >= id
+		and
+		t.lncRNA_name
+		= #{lncnames}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByMotif_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		motif_n t
+		WHERE
+		(select id from motif_id where
+		region = #{regulation}) >= id
+		and
+		t.lncRNA_name
+		= #{lncnames}
+	</select>
+	<!--###### Search by SNP -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySNP_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp t
+		WHERE
+		CHR = (select CHR from lncname_g where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > STAR
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryBySNP_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp t
+		WHERE
+		CHR = (select CHR from lncname_n where
+		Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > STAR
+	</select>
+	<!--###### Search by RiskSNP -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByRiskSNP_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_risk t
+		WHERE
+		CHR = (select CHR from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		STAR > (select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > STAR
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByRiskSNP_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_risk t
+		WHERE
+		CHR = (select CHR from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames})
+		and
+		STAR > (select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > STAR
+	</select>
+	<!--###### Search by eqtl -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByeqtl_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eqtl t
+		WHERE
+		CHR = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > STAR
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByeqtl_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eqtl t
+		WHERE
+		CHR = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		STAR > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > STAR
+	</select>
+	<!--###### Search by afr -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByafr_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_afr t
+		WHERE
+		CHR_A = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_afr t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByafr_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_afr t
+		WHERE
+		CHR_A = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_afr t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_n
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### Search by amr -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByamr_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_amr t
+		WHERE
+		CHR_A = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_amr t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByamr_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_amr t
+		WHERE
+		CHR_A = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_amr t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_n
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### Search by eas -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByeas_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eas t
+		WHERE
+		CHR_A = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_eas t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByeas_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eas t
+		WHERE
+		CHR_A = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_eas t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_n
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### Search by eur -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByeur_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eur t
+		WHERE
+		CHR_A = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_eur t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByeur_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eur t
+		WHERE
+		CHR_A = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_eur t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_n
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### Search by eur -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBysas_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_sas t
+		WHERE
+		CHR_A = (select CHR from lncname_g
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_g where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_sas t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_g
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryBysas_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_sas t
+		WHERE
+		CHR_A = (select CHR from lncname_n
+		where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_A > (select Start from lncname_n where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from
+		lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name =
+		#{lncnames}) > BP_A
+		UNION
+		SELECT distinct
+		t.*
+		FROM
+		snp_sas t
+		WHERE
+		CHR_B =
+		(select CHR from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames})
+		and
+		BP_B > (select Start from lncname_n
+		where Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > BP_B
+	</select>
+
+	<!--############################## 以下为SNP大表里的链接查询 ############################## -->
+	<!--###### Search by SNP_AFR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByAFR_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_afr t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByAFR_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_afr t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### Search by SNP_AMR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByAMR_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_amr t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByAMR_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_amr t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### Search by SNP_EAS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByEAS_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eas t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByEAS_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eas t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### Search by SNP_EQTL -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByEQTL_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eqtl t
+		WHERE
+		SNP_ID = #{ID}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByEQTL_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eqtl t
+		WHERE
+		SNP_ID = #{ID}
+	</select>
+	<!--###### Search by SNP_RISKSNP -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByRISKSNP_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_risk t
+		WHERE
+		SNP_ID = #{ID}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByRISKSNP_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_risk t
+		WHERE
+		SNP_ID = #{ID}
+	</select>
+	<!--###### Search by SNP_MOTIFCHANGE -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByMOTIFCHANGE_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_motif t
+		WHERE
+		SNP_ID = #{ID}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByMOTIFCHANGE_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_motif t
+		WHERE
+		SNP_ID = #{ID}
+	</select>
+	<!--###### Search by SNP_EUR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByEUR_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eur t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByEUR_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_eur t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### Search by SNP_SAS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySAS_G" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_sas t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryBySAS_N" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		snp_sas t
+		WHERE
+		SNP_A = #{ID}
+		OR
+		SNP_B = #{ID}
+	</select>
+	<!--############################## SNP大表里的链接查询结束 ############################## -->
+	<!--###### Search by Histone -Biosample_Type###### -->
+	<select id="queryBiosample_Type_Histone" resultType="string">
+		select
+		Biosample_Type from histone_select group by Biosample_Type
+	</select>
+	<!--###### Search by Histone -Biosample_Name###### -->
+	<select id="queryBiosample_Name_Histone" resultType="hashmap">
+		select
+		Biosample_Name as label,Biosample_Name as value from histone_select
+		where Biosample_Type = #{Biosample_Type} group by Biosample_Name
+	</select>
+	<!--###### Search by Histone -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByHistone_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		CHR,Start,End
+		FROM
+		( (
+		select * from histone
+		where
+		Biosample_Type = #{Biosample_Type}
+		and
+		Biosample_Name =
+		#{Biosample_Name}
+		AND
+		Source = #{histone}
+		) as a )
+		WHERE
+		CHR = (select CHR
+		from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name
+		= #{lncnames})
+		and
+		Start > (select Start from lncname_g where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_g where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > End
+	</select>
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByHistone_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		CHR,Start,End
+		FROM
+		( (
+		select * from histone
+		where
+		Biosample_Type = #{Biosample_Type}
+		and
+		Biosample_Name =
+		#{Biosample_Name}
+		AND
+		Source = #{histone}
+		) as a )
+		WHERE
+		CHR = (select CHR
+		from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name
+		= #{lncnames})
+		and
+		Start > (select Start from lncname_n where
+		Regulation_regions =
+		#{regulation} and lncRNA_name = #{lncnames})
+		and
+		(select End from lncname_n where Regulation_regions = #{regulation}
+		and lncRNA_name = #{lncnames}) > End
+	</select>
+	<!--###### Search by SE -页内搜索###### -->
+	<select id="queryBySE_moren" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		HCT116
+		WHERE
+		Source = #{source}
+		and
+		lncRNA_name =
+		#{lncnames}
+	</select>
+	<select id="queryBySE_tablename" resultType="string">
+		SELECT distinct
+		ID
+		FROM
+		SE_chai_ID
+		WHERE
+		Source = #{source}
+		and
+		Type = #{Biosample_Type}
+		and
+		Sample =
+		#{Biosample_Name}
+	</select>
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		${se_tablename}
+		WHERE
+
+		lncRNA_name = #{lncnames}
+	</select>
+
+	<!--###### Search by SE_TF -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_TF_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		*
+		from ${tf_tablename}
+		where
+		#{chr}= CHR
+		and
+		STAR > #{start}
+		and
+		#{end}> `END`
+	</select>
+
+	<!--###### Search by SE_SNP -页内搜索###### -->
+
+	<select id="queryBySE_SNP_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		snp.*
+		from snp
+		where
+		#{chr}= snp.CHR
+		and
+		snp.STAR >#{start}
+		and
+		#{end}> snp.STAR
+	</select>
+
+	<!--###### Search by SE_RiskSNP -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_RiskSNP_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_risk.*
+		from snp_risk
+		where
+		#{chr}=
+		snp_risk.CHR
+		and
+		snp_risk.STAR >#{start}
+		and
+		#{end} > snp_risk.STAR
+	</select>
+
+	<!--###### Search by SE_EqtL -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_EqtL_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_eqtl.*
+		from snp_eqtl
+		where
+		#{chr}=
+		snp_eqtl.CHR
+		and
+		snp_eqtl.STAR >#{start}
+		and
+		#{end}> snp_eqtl.STAR
+	</select>
+
+	<!--###### Search by SE_SAS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_SAS_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		snp_sas.*
+		from snp_sas
+		where
+		#{chr}= snp_sas.CHR_A
+		and
+		snp_sas.BP_A > #{start}
+		and
+		#{end} > snp_sas.BP_A
+		UNION
+		select distinct
+		snp_sas.*
+		from snp_sas
+		where
+		#{chr}= snp_sas.CHR_B
+		and
+		snp_sas.BP_B >
+		#{start}
+		and
+		#{end} > snp_sas.BP_B
+	</select>
+	<!--###### Search by SE_EUR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_EUR_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		snp_eur.*
+		from snp_eur
+		where
+		#{chr}= snp_eur.CHR_A
+		and
+		snp_eur.BP_A > #{start}
+		and
+		#{end}> snp_eur.BP_A
+		UNION
+		select distinct
+		snp_eur.*
+		from snp_eur
+		where
+		#{chr} = snp_eur.CHR_B
+		and
+		snp_eur.BP_B >
+		#{start}
+		and
+		#{end} > snp_eur.BP_B
+	</select>
+
+	<!--###### Search by SE_EAS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_EAS_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		snp_eas.*
+		from snp_eas
+		where
+		#{chr}= snp_eas.CHR_A
+		and
+		snp_eas.BP_A > #{start}
+		and
+		#{end} > snp_eas.BP_A
+		UNION
+		select distinct
+		snp_eas.*
+		from snp_eas
+		where
+		#{chr} = snp_eas.CHR_B
+		and
+		snp_eas.BP_B >
+		#{start}
+		and
+		#{end} > snp_eas.BP_B
+	</select>
+	<!--###### Search by SE_AMR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_AMR_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		snp_amr.*
+		from snp_amr
+		where
+		#{chr} = snp_amr.CHR_A
+		and
+		snp_amr.BP_A > #{start}
+		and
+		#{end} > snp_amr.BP_A
+		UNION
+		select distinct
+		snp_amr.*
+		from snp_amr
+		where
+		#{chr} = snp_amr.CHR_B
+		and
+		snp_amr.BP_B >
+		#{start}
+		and
+		#{end} > snp_amr.BP_B
+	</select>
+	<!--###### Search by SE_AFR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_AFR_G" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		snp_afr.*
+		from snp_afr
+		where
+		#{chr} = snp_afr.CHR_A
+		and
+		snp_afr.BP_A > #{start}
+		and
+		#{end} > snp_afr.BP_A
+		UNION
+		select distinct
+		snp_afr.*
+		from snp_afr
+		where
+		#{chr} = snp_afr.CHR_B
+		and
+		snp_afr.BP_B >
+		#{start}
+		and
+		#{end} > snp_afr.BP_B
+	</select>
+	<!--###### Search by SE_450K -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_450K_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${tablename_450k}
+		where
+		#{chr} = CHR
+		and
+		STAR > #{start}
+		and
+		#{end} > STAR
+	</select>
+	<!--###### Search by SE_WGBS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_WGBS_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${tablename_WGBS}
+		where
+		#{chr} = CHR
+		and
+		STAR > #{start}
+		and
+		#{end} > STAR
+	</select>
+
+	<!--###### Search by SE_Intersection -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_Intersection_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}=
+		InteractorAChr
+		and
+		InteractorAStart > #{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}=
+		InteractorAChr
+		and
+		#{start} > InteractorAStart
+		and
+		InteractorAEnd >
+		#{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		*
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} > InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start} > InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select
+		distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart > #{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select
+		distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start} > InteractorBStart
+		and
+		InteractorBEnd > #{start}
+		and
+		#{end} >
+		InteractorBEnd
+		UNION
+		select distinct
+		*
+		from
+		${inter_tablename}
+		where
+		#{chr}=
+		InteractorBChr
+		and
+		InteractorBStart > #{start}
+		and
+		#{end} >
+		InteractorBStart
+		and
+		InteractorBEnd > #{end}
+		UNION
+		select distinct
+		*
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start} >
+		InteractorBStart
+		and
+		InteractorBEnd > #{end}
+	</select>
+	<select id="queryByregionA" resultType="string">
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} > InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start} >
+		InteractorBStart
+		and
+		InteractorBEnd > #{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end} > InteractorBStart
+		and
+		InteractorBEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start} >
+		InteractorBStart
+		and
+		InteractorBEnd > #{end}
+	</select>
+	<select id="queryByregionB" resultType="string">
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} > InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start} >
+		InteractorBStart
+		and
+		InteractorBEnd > #{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end} > InteractorBStart
+		and
+		InteractorBEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start} >
+		InteractorBStart
+		and
+		InteractorBEnd > #{end}
+	</select>
+	<!--###### Search by SE_Histone -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryBySE_Histone_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		histone.*
+		from histone
+		where
+		Biosample_Type =
+		#{Biosample_Type}
+		and
+		Biosample_Name = #{Biosample_Name}
+		and
+		Source =
+		#{histone}
+		and
+		#{chr}= CHR
+		and
+		Start > #{start}
+		and
+		#{end} >`End`
+	</select>
+	<select id="queryBySE_motif" parameterType="hashmap" resultType="hashmap">
+		select distinct
+		*
+		from motif_se
+		where
+		#{chr}= CHR
+		and
+		Star > #{start}
+		and
+		#{end} >`End`
+	</select>
+	<!--###### Search by Chromatin -页内搜索###### -->
+	<select id="queryByChromatin_tablename" resultType="string">
+		SELECT
+		distinct
+		ID
+		FROM
+		DNaseI_ID
+		WHERE
+		Method = "DNaseI-seq"
+		and
+		Type =
+		#{Biosample_Type}
+		and
+		Sample = #{Biosample_Name}
+
+	</select>
+	<select id="queryByChromatin_tablenameATAC" resultType="string">
+		SELECT
+		distinct
+		ID
+		FROM
+		DNaseI_ID
+		WHERE
+		Method = "ATAC-seq"
+		and
+		Type =
+		#{Biosample_Type}
+		and
+		Sample = #{Biosample_Name}
+
+	</select>
+	<select id="queryByChromatin_tf_tablename" resultType="string">
+		SELECT
+		distinct
+		ID
+		FROM
+		TF_chai
+		WHERE
+		Biosample_type = #{Biosample_Type}
+		and
+		Biosample_Name = #{Biosample_Name}
+
+	</select>
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*,'DNase-seq' as method
+		FROM
+		${tablename}
+		WHERE
+		Source = #{source}
+		and
+		lncRNA_name = #{lncnames}
+		UNION
+		SELECT
+		distinct
+		*,'ATAC-seq' as method
+		FROM
+		${tablenameATAC}
+		WHERE
+		Source =
+		#{source}
+		and
+		lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryByChromatinA_G" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		chromatina_g
+		WHERE
+		Biosample_Type =
+		#{Biosample_Type}
+		and
+		Biosample_Name =
+		#{Biosample_Name}
+		and
+		lncRNA_name =
+		#{lncnames}
+	</select>
+
+	<!--###### source为NONCODE ###### -->
+	<select id="queryByChromatinD_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		*
+		FROM
+		${tablename}
+		WHERE
+		Source = "NONCODE"
+		and
+		lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryByChromatinA_N" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		chromatina_n t
+		WHERE
+		Biosample_Type =
+		#{Biosample_Type}
+		and
+		Biosample_Name =
+		#{Biosample_Name}
+		and
+		lncRNA_name =
+		#{lncnames}
+	</select>
+
+	<!--###### Search by Chromatin_SNP -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_SNP_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp.*
+		from snp
+		where
+		#{chr}= snp.CHR
+		and
+		snp.STAR > #{start}
+		and
+		#{end}> snp.STAR
+	</select>
+
+	<!--###### Search by Chromatin_RiskSNP -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_RiskSNP_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_risk.*
+		from snp_risk
+		where
+		#{chr} =
+		snp_risk.CHR
+		and
+		snp_risk.STAR > #{start}
+		and
+		#{end} > snp_risk.STAR
+	</select>
+	<!--###### Search by Chromatin_Eqtl -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_Eqtl_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_eqtl.*
+		from snp_eqtl
+		where
+		#{chr} =
+		snp_eqtl.CHR
+		and
+		snp_eqtl.STAR > #{start}
+		and
+		#{end} > snp_eqtl.STAR
+	</select>
+
+	<!--###### Search by Chromatin_SAS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_SAS_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_sas.*
+		from snp_sas
+		where
+		#{chr} =
+		snp_sas.CHR_A
+		and
+		snp_sas.BP_A > #{start}
+		and
+		#{end} > snp_sas.BP_A
+		UNION
+		select distinct
+		snp_sas.*
+		from snp_sas
+		where
+		#{chr} = snp_sas.CHR_B
+		and
+		snp_sas.BP_B > #{start}
+		and
+		#{end} > snp_sas.BP_B
+	</select>
+
+	<!--###### Search by Chromatin_EUR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_EUR_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_eur.*
+		from snp_eur
+		where
+		#{chr} =
+		snp_eur.CHR_A
+		and
+		snp_eur.BP_A > #{start}
+		and
+		#{end} > snp_eur.BP_A
+		UNION
+		select distinct
+		snp_eur.*
+		from snp_eur
+		where
+		#{chr} = snp_eur.CHR_B
+		and
+		snp_eur.BP_B > #{start}
+		and
+		#{end} > snp_eur.BP_B
+	</select>
+	<!--###### Search by Chromatin_EAS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_EAS_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_eas.*
+		from snp_eas
+		where
+		#{chr} =
+		snp_eas.CHR_A
+		and
+		snp_eas.BP_A > #{start}
+		and
+		#{end} > snp_eas.BP_A
+		UNION
+		select distinct
+		snp_eas.*
+		from snp_eas
+		where
+		#{chr} = snp_eas.CHR_B
+		and
+		snp_eas.BP_B > #{start}
+		and
+		#{end}> snp_eas.BP_B
+	</select>
+
+	<!--###### Search by Chromatin_AMR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_AMR_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_amr.*
+		from snp_amr
+		where
+		#{chr} =
+		snp_amr.CHR_A
+		and
+		snp_amr.BP_A > #{start}
+		and
+		#{end} > snp_amr.BP_A
+		UNION
+		select distinct
+		snp_amr.*
+		from snp_amr
+		where
+		#{chr} = snp_amr.CHR_B
+		and
+		snp_amr.BP_B > #{start}
+		and
+		#{end} > snp_amr.BP_B
+	</select>
+
+	<!--###### Search by Chromatin_AFR -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_AFR_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		snp_afr.*
+		from snp_afr
+		where
+		#{chr} =
+		snp_afr.CHR_A
+		and
+		snp_afr.BP_A > #{start}
+		and
+		#{end} > snp_afr.BP_A
+		UNION
+		select distinct
+		snp_afr.*
+		from snp_afr
+		where
+		#{chr} = snp_afr.CHR_B
+		and
+		snp_afr.BP_B > #{start}
+		and
+		#{end} > snp_afr.BP_B
+	</select>
+	<!--###### Search by Chromatin_TF -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_TF_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${tf_tablename}
+		where
+		#{chr} = CHR
+		and
+		STAR > #{start}
+		and
+		#{end} > END
+	</select>
+
+	<!--###### Search by Chromatin_450K -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_450K_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${tablename_450k}
+		where
+		#{chr} = CHR
+		and
+		STAR > #{start}
+		and
+		#{end} > STAR
+	</select>
+
+	<!--###### Search by Chromatin_WGBS -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_WGBS_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${tablename_WGBS}
+		where
+		#{chr} = CHR
+		and
+		STAR > #{start}
+		and
+		#{end} > STAR
+	</select>
+
+	<!--###### Search by Chromatin_Intersection -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_Intersection_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}=
+		InteractorAChr
+		and
+		InteractorAStart > #{start}
+		and
+		#{end}> InteractorAEnd
+		UNION
+		select distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}=
+		InteractorAChr
+		and
+		#{start}> InteractorAStart
+		and
+		InteractorAEnd >
+		#{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		*
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start}> InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select
+		distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart > #{start}
+		and
+		#{end}> InteractorBEnd
+		UNION
+		select
+		distinct
+		*
+		from ${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start}> InteractorBStart
+		and
+		InteractorBEnd> #{start}
+		and
+		#{end} >
+		InteractorBEnd
+		UNION
+		select distinct
+		*
+		from
+		${inter_tablename}
+		where
+		#{chr}=
+		InteractorBChr
+		and
+		InteractorBStart > #{start}
+		and
+		#{end} >
+		InteractorBStart
+		and
+		InteractorBEnd> #{end}
+		UNION
+		select distinct
+		*
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start}>
+		InteractorBStart
+		and
+		InteractorBEnd> #{end}
+	</select>
+	<select id="queryBych_regionA" resultType="string">
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end}> InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start}>
+		InteractorAStart
+		and
+		InteractorAEnd > #{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start}>
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end}> InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start}>
+		InteractorBStart
+		and
+		InteractorBEnd> #{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end} >
+		InteractorBStart
+		and
+		InteractorBEnd> #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorAChr,":",InteractorAStart,"-",InteractorAEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start}>
+		InteractorBStart
+		and
+		InteractorBEnd> #{end}
+	</select>
+	<select id="queryBych_regionB" resultType="string">
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end}> InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start}>
+		InteractorAStart
+		and
+		InteractorAEnd > #{start}
+		and
+		#{end} > InteractorAEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		InteractorAStart >
+		#{start}
+		and
+		#{end} >
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorAChr
+		and
+		#{start}>
+		InteractorAStart
+		and
+		InteractorAEnd > #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end}> InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start}>
+		InteractorBStart
+		and
+		InteractorBEnd> #{start}
+		and
+		#{end} > InteractorBEnd
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		InteractorBStart >
+		#{start}
+		and
+		#{end} >
+		InteractorBStart
+		and
+		InteractorBEnd> #{end}
+		UNION
+		select distinct
+		CONCAT(InteractorBChr,":",InteractorBStart,"-",InteractorBEnd)
+		from
+		${inter_tablename}
+		where
+		#{chr}= InteractorBChr
+		and
+		#{start}>
+		InteractorBStart
+		and
+		InteractorBEnd> #{end}
+	</select>
+	<!--###### Search by Chromatin_Histone -页内搜索###### -->
+	<!--###### source为GENCODE ###### -->
+	<select id="queryByChromatinD_Histone_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		*
+		from histone
+		where
+		Biosample_Type =
+		#{Biosample_Type}
+		and
+		Biosample_Name = #{Biosample_Name}
+		and
+		Source =
+		#{histone}
+		and
+		#{chr} = CHR
+		and
+		Start > #{start}
+		and
+		#{end} > End
+	</select>
+
+	<!--###### Expression 的搜索 ###### -->
+	<select id="queryByExpression_NONCODE_G" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		A6,A9,A12,A16,A19,A23,A26,A32,A33,A34,A35,A38,A39,A41,A42,A44,A45,A46,A49,A51,A53,A55,A56,A58,A61,A62,A63,A66,A67,A70,A71,A75,A76,A77,A78,A79,A80,A81,A82,A84,A85,A86,A88,A89,A90,A92,A97,A99,A100,A102,A103,A104,A105,A106,A107,A108,A109,A110,A111,A112,A113,A114,A116,A121,A124,A125,A126,A128,A129,A130,A137,A138,A139,A140,A141,A142,A143,A144,A145,A146,A147,A149,A150,A151,A153,A154,A155,A156,A157,A158,A160,A164,A165,A169,A170
+		FROM
+		expression_g_n
+		where
+		lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryByExpression_N" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		adipose,adrenal,brain,brain_R,breast,colon,foreskin,heart,hela_R,HLF_1,HLF_2,kidney,liver,liver_R,lung,lymphNode,ovary,placenta_R,prostate,skeltalMuscle,testis,testis_R,thyroid,leukocyte
+		FROM
+		expression_n
+		where
+		lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryByExpression_TCGA" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		ACC,BLCA,CESC,CHOL,COAD,DLBC,ESCA,GBM,HNSC,KICH,KIRC,KIRP,LGG,LIHC,LUAD,MESO,PAAD,PCPG,expression_g_t.READ,SARC,SKCM,STAD,TGCT,THCA,THYM,USC,UVM,LUSC,BRCA,LAML,PRAD,OV,UCEC,UCS
+		FROM
+		expression_g_t
+		where
+		lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryByExpression_GTEX" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		`Adipose Tissue`,`Adrenal Gland`,`Blood
+		Vessel`,`Bladder`,`Brain`,`Breast`,`Blood`,`Skin`,`Cervix
+		Uteri`,`Colon`,`Esophagus`,`Fallopian
+		Tube`,`Heart`,`Kidney`,`Liver`,`Lung`,`Salivary
+		Gland`,`Muscle`,`Nerve`,`Ovary`,`Pancreas`,`Pituitary`,`Prostate`,`Small
+		Intestine`,`Spleen`,`Stomach`,`Testis`,`Thyroid`,`Uterus`,`Vagina`
+		FROM
+		expression_gtex
+		where
+		lncRNA_name = #{lncnames}
+	</select>
+	<select id="queryByExpression_CCLE" parameterType="hashmap"
+		resultType="hashmap">
+		select distinct
+		`prostate`,`stomach`,`urinary_tract`,`glioma`,`ovary`,`leukemia_other`,`kidney`,`thyroid`,`melanoma`,`soft_tissue`,`upper_aerodigestive`,`lymphoma_DLBCL`,`lung_NSC`,`Ewings_sarcoma`,`mesothelioma`,`T-cell_ALL`,`AML`,`multiple_myeloma`,`endometrium`,`pancreas`,`breast`,`B-cell_lymphoma_other`,`B-cell_ALL`,`lymphoma_Burkitt`,`CML`,`colorectal`,`chondrosarcoma`,`meningioma`,`neuroblastoma`,`lung_small_cell`,`esophagus`,`medulloblastoma`,`T-cell_lymphoma_other`,`fibroblast_like`,`osteosarcoma`,`lymphoma_Hodgkin`,`cervix`,`liver`,`giant_cell_tumour`,`bile_duct`,`other`
+		FROM
+		expression_ccle
+		where
+		lncRNA_name = #{lncnames}
+	</select>
+	<!--######################## browse 的搜索 ######################## -->
+	<!--############################################# 所有参数为空 ################################################### -->
+	<select id="queryByBrowse" parameterType="hashmap" resultType="hashmap">
+		select * from browse
+	</select>
+
+	<select id="queryBySource" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse group by Source
+	</select>
+
+	<select id="queryByGene_type" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse group by
+		Gene_type
+	</select>
+
+	<select id="queryByregion" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse group by region
+	</select>
+
+	<select id="queryByCHR" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse group by CHR
+	</select>
+	<!--####################################### source不为空 其余参数为空 ############################################# -->
+	<select id="queryByBrowse_1" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Source = #{source}
+	</select>
+
+	<select id="queryBySource_1" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Source = #{source}
+		group by Source
+	</select>
+
+	<select id="queryByGene_type_1" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} group by Gene_type
+	</select>
+
+	<select id="queryByregion_1" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Source = #{source}
+		group by region
+	</select>
+
+	<select id="queryByCHR_1" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source}
+		group by CHR
+	</select>
+	<!--#################################### source不为空、Gene_type不为空 其余参数为空 ################################# -->
+	<select id="queryByBrowse_2" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Source = #{source} and Gene_type =
+		#{Gene_type}
+	</select>
+
+	<select id="queryBySource_2" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Source = #{source}
+		and Gene_type = #{Gene_type} group by Source
+	</select>
+
+	<select id="queryByGene_type_2" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and Gene_type = #{Gene_type} group by Gene_type
+	</select>
+
+	<select id="queryByregion_2" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Source = #{source}
+		and Gene_type = #{Gene_type} group by region
+	</select>
+
+	<select id="queryByCHR_2" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		Gene_type = #{Gene_type} group by CHR
+	</select>
+	<!--#################################### source不为空、Gene_type不为空、region不为空 
+		其余参数为空 ################################# -->
+	<select id="queryByBrowse_3" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Source = #{source} and Gene_type =
+		#{Gene_type} and region = #{region}
+	</select>
+
+	<select id="queryBySource_3" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Source = #{source}
+		and Gene_type = #{Gene_type} and region = #{region} group by Source
+	</select>
+
+	<select id="queryByGene_type_3" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and Gene_type = #{Gene_type} and region = #{region}
+		group by Gene_type
+	</select>
+
+	<select id="queryByregion_3" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Source = #{source}
+		and Gene_type = #{Gene_type} and region = #{region} group by region
+	</select>
+
+	<select id="queryByCHR_3" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		Gene_type = #{Gene_type} and region = #{region} group by CHR
+	</select>
+	<!--#################################### source不为空、Gene_type不为空、region不为空 
+		CHR不为空 ################################# -->
+	<select id="queryByBrowse_4" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Source = #{source} and Gene_type =
+		#{Gene_type} and region = #{region} and CHR = #{CHR}
+	</select>
+
+	<select id="queryBySource_4" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Source = #{source}
+		and Gene_type = #{Gene_type} and region = #{region} and CHR = #{CHR}
+		group by Source
+	</select>
+
+	<select id="queryByGene_type_4" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and Gene_type = #{Gene_type} and region = #{region}
+		and CHR = #{CHR} group by Gene_type
+	</select>
+
+	<select id="queryByregion_4" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Source = #{source}
+		and Gene_type = #{Gene_type} and region = #{region} and CHR = #{CHR}
+		group by region
+	</select>
+
+	<select id="queryByCHR_4" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		Gene_type = #{Gene_type} and region = #{region} and CHR = #{CHR} group
+		by CHR
+	</select>
+	<!--#################################### Gene_type不为空、其余参数全为空 ################################# -->
+	<select id="queryByBrowse_5" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Gene_type = #{Gene_type}
+	</select>
+
+	<select id="queryBySource_5" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Gene_type =
+		#{Gene_type} group by Source
+	</select>
+
+	<select id="queryByGene_type_5" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Gene_type = #{Gene_type} group by Gene_type
+	</select>
+
+	<select id="queryByregion_5" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Gene_type =
+		#{Gene_type} group by region
+	</select>
+
+	<select id="queryByCHR_5" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Gene_type =
+		#{Gene_type} group by CHR
+	</select>
+	<!--#################################### Gene_type不为空、region不为空、其余参数全为空 
+		################################# -->
+	<select id="queryByBrowse_6" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Gene_type = #{Gene_type} and region =
+		#{region}
+	</select>
+
+	<select id="queryBySource_6" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Gene_type =
+		#{Gene_type} and region = #{region} group by Source
+	</select>
+
+	<select id="queryByGene_type_6" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Gene_type = #{Gene_type} and region = #{region} group by Gene_type
+	</select>
+
+	<select id="queryByregion_6" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Gene_type =
+		#{Gene_type} and region = #{region} group by region
+	</select>
+
+	<select id="queryByCHR_6" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Gene_type =
+		#{Gene_type} and region = #{region} group by CHR
+	</select>
+	<!--#################################### Gene_type不为空、region不为空、CHR不为空、其余参数全为空 
+		################################# -->
+	<select id="queryByBrowse_7" parameterType="hashmap" resultType="hashmap">
+		select * from browse where Gene_type = #{Gene_type} and region =
+		#{region} and CHR = #{CHR}
+	</select>
+
+	<select id="queryBySource_7" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where Gene_type =
+		#{Gene_type} and region = #{region} and CHR = #{CHR} group by Source
+	</select>
+
+	<select id="queryByGene_type_7" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Gene_type = #{Gene_type} and region = #{region} and CHR = #{CHR} group
+		by Gene_type
+	</select>
+
+	<select id="queryByregion_7" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where Gene_type =
+		#{Gene_type} and region = #{region} and CHR = #{CHR} group by region
+	</select>
+
+	<select id="queryByCHR_7" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Gene_type =
+		#{Gene_type} and region = #{region} and CHR = #{CHR} group by CHR
+	</select>
+	<!--#################################### region不为空、其余参数全为空 ################################# -->
+	<select id="queryByBrowse_8" parameterType="hashmap" resultType="hashmap">
+		select * from browse where region = #{region}
+	</select>
+
+	<select id="queryBySource_8" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where region = #{region}
+		group by Source
+	</select>
+
+	<select id="queryByGene_type_8" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		region = #{region} group by Gene_type
+	</select>
+
+	<select id="queryByregion_8" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where region = #{region}
+		group by region
+	</select>
+
+	<select id="queryByCHR_8" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where region = #{region}
+		group by CHR
+	</select>
+	<!--#################################### region不为空、CHR不为空、其余参数全为空 ################################# -->
+	<select id="queryByBrowse_9" parameterType="hashmap" resultType="hashmap">
+		select * from browse where region = #{region} and CHR = #{CHR}
+	</select>
+
+	<select id="queryBySource_9" parameterType="hashmap" resultType="hashmap">
+		select Source,count(*) as number from browse where region = #{region}
+		and CHR = #{CHR} group by Source
+	</select>
+
+	<select id="queryByGene_type_9" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		region = #{region} and CHR = #{CHR} group by Gene_type
+	</select>
+
+	<select id="queryByregion_9" parameterType="hashmap" resultType="hashmap">
+		select region,count(*) as number from browse where region = #{region}
+		and CHR = #{CHR} group by region
+	</select>
+
+	<select id="queryByCHR_9" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where region = #{region} and
+		CHR = #{CHR} group by CHR
+	</select>
+	<!--#################################### CHR不为空、其余参数全为空 ################################# -->
+	<select id="queryByBrowse_10" parameterType="hashmap"
+		resultType="hashmap">
+		select * from browse where CHR = #{CHR}
+	</select>
+
+	<select id="queryBySource_10" parameterType="hashmap"
+		resultType="hashmap">
+		select Source,count(*) as number from browse where CHR =
+		#{CHR} group by Source
+	</select>
+
+	<select id="queryByGene_type_10" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where CHR =
+		#{CHR} group by Gene_type
+	</select>
+
+	<select id="queryByregion_10" parameterType="hashmap"
+		resultType="hashmap">
+		select region,count(*) as number from browse where CHR =
+		#{CHR} group by region
+	</select>
+
+	<select id="queryByCHR_10" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where CHR = #{CHR} group by
+		CHR
+	</select>
+	<!--#################################### source不为空、region不为空、其余参数为空 ################################# -->
+	<select id="queryByBrowse_11" parameterType="hashmap"
+		resultType="hashmap">
+		select * from browse where Source = #{source} and region =
+		#{region}
+	</select>
+
+	<select id="queryBySource_11" parameterType="hashmap"
+		resultType="hashmap">
+		select Source,count(*) as number from browse where Source =
+		#{source} and region = #{region} group by Source
+	</select>
+
+	<select id="queryByGene_type_11" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and region = #{region} group by Gene_type
+	</select>
+
+	<select id="queryByregion_11" parameterType="hashmap"
+		resultType="hashmap">
+		select region,count(*) as number from browse where Source =
+		#{source} and region = #{region} group by region
+	</select>
+
+	<select id="queryByCHR_11" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		region = #{region} group by CHR
+	</select>
+	<!--#################################### source不为空、CHR不为空、其余参数为空 ################################# -->
+	<select id="queryByBrowse_12" parameterType="hashmap"
+		resultType="hashmap">
+		select * from browse where Source = #{source} and CHR =
+		#{CHR}
+	</select>
+
+	<select id="queryBySource_12" parameterType="hashmap"
+		resultType="hashmap">
+		select Source,count(*) as number from browse where Source =
+		#{source} and CHR = #{CHR} group by Source
+	</select>
+
+	<select id="queryByGene_type_12" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and CHR = #{CHR} group by Gene_type
+	</select>
+
+	<select id="queryByregion_12" parameterType="hashmap"
+		resultType="hashmap">
+		select region,count(*) as number from browse where Source =
+		#{source} and CHR = #{CHR} group by region
+	</select>
+
+	<select id="queryByCHR_12" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		CHR = #{CHR} group by CHR
+	</select>
+	<!--#################################### Gene_type不为空、CHR不为空、其余参数为空 ################################# -->
+	<select id="queryByBrowse_13" parameterType="hashmap"
+		resultType="hashmap">
+		select * from browse where Gene_type = #{Gene_type} and CHR
+		= #{CHR}
+	</select>
+
+	<select id="queryBySource_13" parameterType="hashmap"
+		resultType="hashmap">
+		select Source,count(*) as number from browse where
+		Gene_type = #{Gene_type} and CHR = #{CHR} group by Source
+	</select>
+
+	<select id="queryByGene_type_13" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Gene_type = #{Gene_type} and CHR = #{CHR} group by Gene_type
+	</select>
+
+	<select id="queryByregion_13" parameterType="hashmap"
+		resultType="hashmap">
+		select region,count(*) as number from browse where
+		Gene_type = #{Gene_type} and CHR = #{CHR} group by region
+	</select>
+
+	<select id="queryByCHR_13" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Gene_type =
+		#{Gene_type} and CHR = #{CHR} group by CHR
+	</select>
+	<!--#################################### source不为空、region不为空、CHR不为空、其余参数为空 
+		################################# -->
+	<select id="queryByBrowse_14" parameterType="hashmap"
+		resultType="hashmap">
+		select * from browse where Source = #{source} and region =
+		#{region} and CHR = #{CHR}
+	</select>
+
+	<select id="queryBySource_14" parameterType="hashmap"
+		resultType="hashmap">
+		select Source,count(*) as number from browse where Source =
+		#{source} and region = #{region} and CHR = #{CHR} group by Source
+	</select>
+
+	<select id="queryByGene_type_14" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and region = #{region} and CHR = #{CHR} group by
+		Gene_type
+	</select>
+
+	<select id="queryByregion_14" parameterType="hashmap"
+		resultType="hashmap">
+		select region,count(*) as number from browse where Source =
+		#{source} and region = #{region} and CHR = #{CHR} group by region
+	</select>
+
+	<select id="queryByCHR_14" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		region = #{region} and CHR = #{CHR} group by CHR
+	</select>
+	<!--#################################### source不为空、Gene_type不为空、CHR不为空、其余参数为空 
+		################################# -->
+	<select id="queryByBrowse_15" parameterType="hashmap"
+		resultType="hashmap">
+		select * from browse where Source = #{source} and Gene_type
+		= #{Gene_type} and CHR = #{CHR}
+	</select>
+
+	<select id="queryBySource_15" parameterType="hashmap"
+		resultType="hashmap">
+		select Source,count(*) as number from browse where Source =
+		#{source} and Gene_type = #{Gene_type} and CHR = #{CHR} group by
+		Source
+	</select>
+
+	<select id="queryByGene_type_15" parameterType="hashmap"
+		resultType="hashmap">
+		select Gene_type,count(*) as number from browse where
+		Source = #{source} and Gene_type = #{Gene_type} and CHR = #{CHR} group
+		by Gene_type
+	</select>
+
+	<select id="queryByregion_15" parameterType="hashmap"
+		resultType="hashmap">
+		select region,count(*) as number from browse where Source =
+		#{source} and Gene_type = #{Gene_type} and CHR = #{CHR} group by
+		region
+	</select>
+
+	<select id="queryByCHR_15" parameterType="hashmap" resultType="hashmap">
+		select CHR,count(*) as number from browse where Source = #{source} and
+		Gene_type = #{Gene_type} and CHR = #{CHR} group by CHR
+	</select>
+	<!--######################## browse 的搜索结束 ######################## -->
+	<!--######################## download 的搜索 ######################## -->
+	<!--#################################### 参数情况1 ################################# -->
+	<select id="queryByDownload" parameterType="hashmap" resultType="hashmap">
+		select * from download
+	</select>
+	<select id="queryByData_source" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download group
+		by Data_sources
+	</select>
+	<select id="queryByElement_class" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download group
+		by Element_class
+	</select>
+	<select id="queryByBiosample_type" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		group by Biosample_name
+	</select>
+	<!--#################################### 参数情况2 ################################# -->
+	<select id="queryByDownload_1" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+	</select>
+	<select id="queryByData_source_1" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} group by Data_sources
+	</select>
+	<select id="queryByElement_class_1" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_1" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_1" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况3 ################################# -->
+	<select id="queryByDownload_2" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Element_class = #{Element_class}
+	</select>
+	<select id="queryByData_source_2" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class}
+		group by Data_sources
+	</select>
+	<select id="queryByElement_class_2" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class}
+		group by Element_class
+	</select>
+	<select id="queryByBiosample_type_2" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_2" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况4 ################################# -->
+	<select id="queryByDownload_3" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type}
+	</select>
+	<select id="queryByData_source_3" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class} and
+		Biosample_type = #{Biosample_type} group by Data_sources
+	</select>
+	<select id="queryByElement_class_3" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class} and
+		Biosample_type = #{Biosample_type} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_3" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} and Biosample_type = #{Biosample_type} group by
+		Biosample_type
+	</select>
+	<select id="queryByBiosample_name_3" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} and Biosample_type = #{Biosample_type} group by
+		Biosample_name
+	</select>
+	<!--#################################### 参数情况5 ################################# -->
+	<select id="queryByDownload_4" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name}
+	</select>
+	<select id="queryByData_source_4" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class} and
+		Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name} group by Data_sources
+	</select>
+	<select id="queryByElement_class_4" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class} and
+		Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_4" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} and Biosample_type = #{Biosample_type} and
+		Biosample_name = #{Biosample_name} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_4" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} and Biosample_type = #{Biosample_type} and
+		Biosample_name = #{Biosample_name} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况6 ################################# -->
+	<select id="queryByDownload_5" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Element_class =
+		#{Element_class}
+	</select>
+	<select id="queryByData_source_5" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Element_class = #{Element_class} group by Data_sources
+	</select>
+	<select id="queryByElement_class_5" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Element_class = #{Element_class} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_5" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Element_class = #{Element_class} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_5" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Element_class = #{Element_class} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况7 ################################# -->
+	<select id="queryByDownload_6" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Element_class =
+		#{Element_class} and Biosample_type = #{Biosample_type}
+	</select>
+	<select id="queryByData_source_6" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} group by Data_sources
+	</select>
+	<select id="queryByElement_class_6" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_6" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_6" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况8 ################################# -->
+	<select id="queryByDownload_7" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Element_class =
+		#{Element_class} and Biosample_type = #{Biosample_type} and
+		Biosample_name = #{Biosample_name}
+	</select>
+	<select id="queryByData_source_7" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name} group by
+		Data_sources
+	</select>
+	<select id="queryByElement_class_7" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name} group by
+		Element_class
+	</select>
+	<select id="queryByBiosample_type_7" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name} group by
+		Biosample_type
+	</select>
+	<select id="queryByBiosample_name_7" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Element_class = #{Element_class} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name} group by
+		Biosample_name
+	</select>
+	<!--#################################### 参数情况9 ################################# -->
+	<select id="queryByDownload_8" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Biosample_type =
+		#{Biosample_type}
+	</select>
+	<select id="queryByData_source_8" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Biosample_type = #{Biosample_type} group by Data_sources
+	</select>
+	<select id="queryByElement_class_8" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Biosample_type = #{Biosample_type} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_8" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Biosample_type = #{Biosample_type} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_8" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Biosample_type = #{Biosample_type} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况10 ################################# -->
+	<select id="queryByDownload_9" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name}
+	</select>
+	<select id="queryByData_source_9" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name} group by Data_sources
+	</select>
+	<select id="queryByElement_class_9" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_9" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_9" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况11 ################################# -->
+	<select id="queryByDownload_10" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Biosample_name =
+		#{Biosample_name}
+	</select>
+	<select id="queryByData_source_10" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Biosample_name = #{Biosample_name} group by Data_sources
+	</select>
+	<select id="queryByElement_class_10" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Biosample_name = #{Biosample_name} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_10" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Biosample_name = #{Biosample_name} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_10" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Biosample_name = #{Biosample_name} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况12 ################################# -->
+	<select id="queryByDownload_11" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Biosample_type = #{Biosample_type}
+	</select>
+	<select id="queryByData_source_11" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Biosample_type = #{Biosample_type}
+		group by Data_sources
+	</select>
+	<select id="queryByElement_class_11" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Biosample_type = #{Biosample_type}
+		group by Element_class
+	</select>
+	<select id="queryByBiosample_type_11" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Biosample_type =
+		#{Biosample_type} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_11" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Biosample_type =
+		#{Biosample_type} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况13 ################################# -->
+	<select id="queryByDownload_12" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Biosample_name = #{Biosample_name}
+	</select>
+	<select id="queryByData_source_12" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Biosample_name = #{Biosample_name}
+		group by Data_sources
+	</select>
+	<select id="queryByElement_class_12" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Biosample_name = #{Biosample_name}
+		group by Element_class
+	</select>
+	<select id="queryByBiosample_type_12" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Biosample_name =
+		#{Biosample_name} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_12" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Biosample_name =
+		#{Biosample_name} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况14 ################################# -->
+	<select id="queryByDownload_13" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Element_class =
+		#{Element_class} and Biosample_name = #{Biosample_name}
+	</select>
+	<select id="queryByData_source_13" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Element_class = #{Element_class} and Biosample_name =
+		#{Biosample_name} group by Data_sources
+	</select>
+	<select id="queryByElement_class_13" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Element_class = #{Element_class} and Biosample_name =
+		#{Biosample_name} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_13" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Element_class = #{Element_class} and Biosample_name =
+		#{Biosample_name} group by Biosample_type
+	</select>
+	<select id="queryByBiosample_name_13" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Element_class = #{Element_class} and Biosample_name =
+		#{Biosample_name} group by Biosample_name
+	</select>
+	<!--#################################### 参数情况15 ################################# -->
+	<select id="queryByDownload_14" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Biosample_type = #{Biosample_type} and Biosample_name =
+		#{Biosample_name}
+	</select>
+	<select id="queryByData_source_14" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Biosample_type = #{Biosample_type}
+		and Biosample_name = #{Biosample_name} group by Data_sources
+	</select>
+	<select id="queryByElement_class_14" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Biosample_type = #{Biosample_type}
+		and Biosample_name = #{Biosample_name} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_14" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name} group by
+		Biosample_type
+	</select>
+	<select id="queryByBiosample_name_14" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Biosample_type =
+		#{Biosample_type} and Biosample_name = #{Biosample_name} group by
+		Biosample_name
+	</select>
+	<!--#################################### 参数情况16 ################################# -->
+	<select id="queryByDownload_15" parameterType="hashmap"
+		resultType="hashmap">
+		select * from download where Data_sources = #{Data_source}
+		and Element_class = #{Element_class} and Biosample_name =
+		#{Biosample_name}
+	</select>
+	<select id="queryByData_source_15" parameterType="hashmap"
+		resultType="hashmap">
+		select Data_sources,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class} and
+		Biosample_name = #{Biosample_name} group by Data_sources
+	</select>
+	<select id="queryByElement_class_15" parameterType="hashmap"
+		resultType="hashmap">
+		select Element_class,count(*) as number from download where
+		Data_sources = #{Data_source} and Element_class = #{Element_class} and
+		Biosample_name = #{Biosample_name} group by Element_class
+	</select>
+	<select id="queryByBiosample_type_15" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_type,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} and Biosample_name = #{Biosample_name} group by
+		Biosample_type
+	</select>
+	<select id="queryByBiosample_name_15" parameterType="hashmap"
+		resultType="hashmap">
+		select Biosample_name,count(*) as number from download
+		where Data_sources = #{Data_source} and Element_class =
+		#{Element_class} and Biosample_name = #{Biosample_name} group by
+		Biosample_name
+	</select>
+	<!--######################## download 的搜索结束 ######################## -->
+	<select id="queryByRAnalyze" parameterType="hashmap" resultType="hashmap">
+		select TF from ${pro_tablename} where Regulation_region =
+		#{promoterRegion} and sample = #{tftype} and lncRNA = #{lncRNA}
+		union
+		select TF from ${other_tablename} where sample = #{tftype} and lncRNA
+		=
+		#{lncRNA}
+	</select>
+	<select id="queryByRresult_left" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		browse t
+		WHERE
+		source = #{source}
+		and
+		region = #{promoterRegion}
+		and
+		lncRNA_name = #{lncRNA}
+	</select>
+	<select id="queryByRresult_left_A" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT distinct
+		t.*
+		FROM
+		browse t
+		WHERE
+		region =
+		#{promoterRegion}
+		and
+		lncRNA_name = #{lncRNA}
+	</select>
+	<select id="queryByRAnalyze_node" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT TF from
+		${pro_tablename}
+		WHERE
+		Regulation_region = #{promoterRegion}
+		and
+		sample = #{tftype}
+		and
+		lncRNA =
+		#{lncRNA}
+		union
+		select DISTINCT TF from
+		${other_tablename}
+		WHERE
+		sample =
+		#{tftype}
+		and
+		lncRNA = #{lncRNA}
+	</select>
+	<select id="queryByRAnalyze_edge" parameterType="hashmap"
+		resultType="hashmap">
+		select DISTINCT 'Promoter' as source, TF as target from
+		${pro_tablename}
+		WHERE
+		Regulation_region = #{promoterRegion}
+		and
+		sample =
+		#{tftype}
+		and
+		lncRNA = #{lncRNA}
+		union
+		select DISTINCT type as source, TF
+		as target from
+		${other_tablename}
+		WHERE
+		sample = #{tftype}
+		and
+		lncRNA =
+		#{lncRNA}
+	</select>
+
+	<select id="querytftype" resultType="string">
+		select type from TF_sample
+		group by type
+	</select>
+	<select id="queryByRAnalyze_chr" resultType="string">
+		select distinct CHR
+		from lncname_g where lncRNA_name = #{lncRNA}
+		union
+		select distinct CHR
+		from lncname_n where lncRNA_name = #{lncRNA}
+	</select>
+	
+    <insert id="insertUserEmail" keyColumn="f_id" keyProperty="fId" parameterType="com.lyy.model.UserEmail" useGeneratedKeys="true">
+        insert into t_user_email (f_user_id, f_email, f_path,
+                                  f_bed_file, f_hg, f_method,
+                                  f_min, f_max, f_int_p_value,
+                                  f_datatype, f_subset, f_line_length,
+                                  f_time)
+        values (#{fUserId,jdbcType=VARCHAR}, #{fEmail,jdbcType=VARCHAR}, #{fPath,jdbcType=VARCHAR},
+                #{fBedFile,jdbcType=VARCHAR}, #{fHg,jdbcType=VARCHAR}, #{fMethod,jdbcType=VARCHAR},
+                #{fMin,jdbcType=VARCHAR}, #{fMax,jdbcType=VARCHAR}, #{fIntPValue,jdbcType=VARCHAR},
+                #{fDatatype,jdbcType=VARCHAR}, #{fSubset,jdbcType=VARCHAR}, #{fLineLength,jdbcType=VARCHAR},
+                #{fTime,jdbcType=TIMESTAMP})
+    </insert>
+    
+	<select id="selectSnpDisease" resultType="string">
+		select disease from disease_risksnp where `set` = #{set}
+	</select>
+	
+</mapper>

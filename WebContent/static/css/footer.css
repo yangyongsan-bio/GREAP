@@ -1,0 +1,24 @@
+footer {
+    font: 100% arial, sans-serif;
+    height: 130px;
+    padding: 20px 0 5px 0;
+    text-align: center;
+    background: #F2F4F7;
+    color: #FFF;
+    margin: 0 0 0 0;
+}
+
+footer p {
+    line-height: 1.7em;
+    padding: 0 0 10px 0;
+}
+
+footer a {
+    color: #A3A5A8;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #A3A5A8;
+    text-decoration: none;
+}

@@ -1,0 +1,96 @@
+
+body{}
+img{
+    width:auto;
+    height:auto;
+    max-width:100%;
+    max-height:100%;
+}
+header.page-header .main-menu{
+    position: relative;
+}
+.navbar-brand img {
+    margin-top: 20px;
+}
+.main-menu .navbar-nav{
+    float: left;
+    padding: 30px 0;
+}
+
+.navbar-nav li a{
+    background-color:#06153e;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    padding-top: 6px;
+    padding-bottom: 0;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    -ms-transition: all .3s;
+    -o-transition: all .3s;
+    transition: all .3s;
+    padding: 10px 18px;
+}
+
+.navbar-nav li a:hover,
+.navbar-nav li.active a{
+    background-color:#0B243B;
+    color: #60BDA0;
+}
+
+
+header.navbar-nav > .open > a,
+header.navbar-nav > .open > a:hover,
+header.navbar-nav > .open > a:focus {
+    -webkit-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    -ms-transition: all .3s ease;
+    -o-transition: all .3s ease;
+    transition: all .3s ease;
+}
+
+.navbar-toggle{
+    border: 2px solid black;
+}
+
+.icon-bar{
+    background-color: #0fbcf9;
+}
+
+.navbar-brand {
+    float: left;
+    height: 40px;
+    padding: 0px 10px;
+    font-size: 18px;
+    line-height: 15px;
+}
+
+.carousel-control.left {
+
+/*     background-image:none;  */
+
+    background-repeat: repeat-x;
+
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#80000000', endColorstr='#00000000', GradientType=1);
+
+}
+
+.carousel-control.right {
+
+    left: auto;    right: 0;
+
+/*     background-image:none;  */
+
+    background-repeat: repeat-x;
+
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#80000000', GradientType=1);
+
+}
+.navbot {
+    height:5px;
+    width:100%;
+    background: -webkit-linear-gradient(#D3D3D3, #fff); /* Safari 5.1 - 6.0 */
+    background: -o-linear-gradient(#D3D3D3, #fff); /* Opera 11.1 - 12.0 */
+    background: -moz-linear-gradient(#D3D3D3, #fff); /* Firefox 3.6 - 15 */
+    background: linear-gradient(#D3D3D3, #fff); /* 鏍囧噯鐨勮娉�,蹇呴』鏀炬渶鍚� */
+}
